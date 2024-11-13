@@ -1,1 +1,45 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Memuat gambar dalam skala abu-abu
+image = cv2.imread('image_path', cv2.IMREAD_GRAYSCALE)
+
+# Menghitung histogram gambar
+hist, bins = np.histogram(image.flatten(), 256, [0, 256])
+
+# Fungsi distribusi kumulatif (CDF)
+cdf = hist.cumsum()
+cdf_normalized = cdf * hist.max() / cdf.max()
+
+# Masking untuk semua nilai nol (untuk menghindari kesalahan pembagian)
+cdf_m = np.ma.masked_equal(cdf, 0)
+cdf_m = (cdf_m - cdf_m.min()) * 255 / (cdf_m.max() - cdf_m.min())
+cdf = np.ma.filled(cdf_m, 0).astype('uint8')
+
+# Menerapkan histogram equalization
+equalized_image = cdf[image]
+
+# Menampilkan gambar asli dan hasil equalization serta histogramnya
+plt.figure(figsize=(12, 6))
+
+# Gambar dan Histogram Asli
+plt.subplot(2, 2, 1)
+plt.imshow(image, cmap='gray')
+plt.title('Gambar Asli')
+
+plt.subplot(2, 2, 2)
+plt.hist(image.flatten(), 256, [0, 256], color='r')
+plt.title('Histogram Asli')
+
+# Gambar dan Histogram Setelah Equalization
+plt.subplot(2, 2, 3)
+plt.imshow(equalized_image, cmap='gray')
+plt.title('Gambar Setelah Equalization')
+
+plt.subplot(2, 2, 4)
+plt.hist(equalized_image.flatten(), 256, [0, 256], color='g')
+plt.title('Histogram Setelah Equalization')
+
+plt.show()
 
